@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>我的音乐播放器</title>
+    <link rel="stylesheet" href="styles/main.css" />
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  </head>
+  <body>
+    <div id="app" class="container">
+      <!-- 顶部导航栏 -->
+      <header class="header">
+        <div class="nav-buttons">
+          <button class="nav-btn"><</button>
+          <button class="nav-btn">></button>
+          <input type="text" class="search-input" placeholder="搜索" />
+        </div>
+        <div class="user-controls">
+          <button v-if="!isLoggedIn" class="user-btn" @click="showLoginModal">
+            登录
+          </button>
+          <div v-else class="user-info">
+            <div class="user-avatar">
+              <img
+                :src="userAvatar"
+                alt="用户头像"
+                @error="handleAvatarError"
+              />
+            </div>
+            <span class="username">{{ username }}</span>
+            <div class="user-dropdown">
+              <button class="icon-btn">▼</button>
+              <div class="dropdown-menu">
+                <button class="dropdown-item" @click="logout">退出登录</button>
+              </div>
+            </div>
+          </div>
+          <button class="icon-btn theme-btn" @click="toggleTheme">��</button>
+          <button class="icon-btn settings-btn">⚙️</button>
+        </div>
+      </header>
+
+      <!-- 登录模态框 -->
+      <div v-if="showModal" class="modal-overlay" @click="closeModal">
+        <div class="modal-content" @click.stop>
+          <h2>登录</h2>
+          <form @submit.prevent="handleLogin">
+            <div class="form-group">
+              <label for="username">用户名（admin）</label>
+              <input
+                type="text"
+                id="username"
+                v-model="loginForm.username"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="password">密码（password）</label>
+              <input
+                type="password"
+                id="password"
+                v-model="loginForm.password"
+                required
+              />
+            </div>
+            <div class="form-error" v-if="loginError">{{ loginError }}</div>
+            <div class="form-actions">
+              <button type="submit" :disabled="isLoading">
+                {{ isLoading ? '登录中...' : '登录' }}
+              </button>
+              <button type="button" @click="closeModal">取消</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- 侧边栏 -->
+      <aside class="sidebar">
+        <ul class="sidebar-menu">
+          <li
+            class="menu-item"
+            :class="{ active: currentSection === 'featured' }"
+            @click="switchSection('featured')"
+          >
+            精选歌单
+          </li>
+          <li
+            class="menu-item"
+            :class="{ active: currentSection === 'liked' }"
+            @click="switchSection('liked')"
+          >
+            我喜欢的音乐
+          </li>
+          <li
+            class="menu-item"
+            :class="{ active: currentSection === 'recent' }"
+            @click="switchSection('recent')"
+          >
+            最近播放
+          </li>
+          <li
+            class="menu-item"
+            :class="{ active: currentSection === 'personal' }"
+            @click="switchSection('personal')"
+          >
+            私人订制
+          </li>
+        </ul>
+      </aside>
+
+      <!-- 主内容区 -->
+      <main class="main-content">
+        <nav class="category-nav">
+          <a href="#" class="active">全部</a>
+          <a href="#">排行榜</a>
+          <a href="#">流行</a>
+          <a href="#">民谣</a>
+          <a href="#">电子</a>
+          <a href="#">舞曲</a>
+        </nav>
+
+        <div class="music-grid">
+          <div v-for="music in musicList" :key="music.title" class="music-card">
+            <img
+              :src="music.cover"
+              :alt="music.title"
+              @error="handleImageError"
+            />
+            <h3>{{ music.title }}</h3>
+            <p>{{ music.artist }}</p>
+          </div>
+        </div>
+      </main>
+
+      <!-- 底部播放控制栏 -->
+      <footer class="player-bar">
+        <div class="now-playing">
+          <img
+            src="images/default-cover.jpg"
+            alt="封面"
+            class="current-cover"
+          />
+          <div class="track-info">
+            <div class="track-name">歌曲名称</div>
+            <div class="artist-name">艺术家</div>
+          </div>
+        </div>
+        <div class="player-controls">
+          <button class="control-btn prev">上一首</button>
+          <button class="control-btn play">播放</button>
+          <button class="control-btn next">下一首</button>
+        </div>
+        <div class="progress-bar">
+          <span class="current-time">0:00</span>
+          <div class="progress">
+            <div class="progress-current"></div>
+          </div>
+          <span class="total-time">0:00</span>
+        </div>
+      </footer>
+    </div>
+
+    <script src="scripts/app.js" type="module"></script>
+  </body>
+</html>
